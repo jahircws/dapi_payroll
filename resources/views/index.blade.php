@@ -25,6 +25,26 @@
     <script>
         let connectLoading = true;
         var ba = null;
+        // var transfer = {
+        //   senderID: "",
+        //   amount: 0,
+        //   remarks: "",
+        //   beneficiary: {
+        //     name: "Mohammad Omar Amr",
+        //     nickname: "Mohammad Omar LIV",
+        //     iban: "DAPIBANKAELIV1619116273261987517393",
+        //     accountNumber: "1619116273261987517393",
+        //     swiftCode: "DAPIBANK_AE_LIV",
+        //     address: {
+        //         line1: "Maryam Street",
+        //         line2: "Abu Dhabi",
+        //         line3: "United Arab Emirates"
+        //     },
+        //     country: "AE",
+        //     branchAddress: "Dubai Mall",
+        //     branchName: "Main Branch"  
+        //   }
+        // }
 
         var handler = Dapi.create({
         environment: Dapi.environments.sandbox, //or .production
@@ -60,6 +80,19 @@
                     console.dir("User Cancelled")
                 })
             })
+            //for auto payment
+            // ba.payment.transferAutoflow(transfer)
+            // .then(transferResponse => {
+            //   if(transferResponse.status === "done") {
+            //     console.dir(transferResponse)
+            //   } else {
+            //     console.error("API Responded with an error")
+            //     console.dir(transferResponse)
+            //   }
+            // })
+            // .catch(error => {
+            //     console.dir(error)
+            // })
         },
         onFailedLogin: function(err) {
             if (err != null) {
