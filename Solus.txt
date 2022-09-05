@@ -1,0 +1,7 @@
+APP_KEY: 0cda695a3fdfdd74d9b09c30961c3c636f5f57c6221fb40a53c87ae383f4d33d
+
+APP_SECRET: 0f78b93a6c5937ee3af83d2ee30b3d5c302e46b6ab1460e0a01f6675777934a3
+
+
+https://docs.dapi.com/docs/how-to-integrate-with-websdk
+https://docs.dapi.com/docs/php-backend-server
