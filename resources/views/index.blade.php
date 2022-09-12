@@ -23,6 +23,7 @@
           <div class="card">
             <div class="card-body text-center">
               <button type="button" class="btn btn-primary" onClick="dapiLogin();">Login now</button>
+              <div id="widget"></div>
             </div>
           </div>
         </div>
@@ -30,7 +31,7 @@
       <div class="row justify-content-center" id="payFunc" style="display:none;">
         <div class="col-md-2">
           <input type="text" name="curr_balance" id="curr_balance" class="form-control" readonly>
-          <button type="button" class="btn btn-primary" onClick="showBalance();">Show Balance</button>
+          <button type="button" class="btn btn-primary" id="btn_bal" onClick="showBalance();">Show Balance</button>
         </div>
         <div class="col-md-2">
           <button type="button" class="btn btn-primary" onClick="addBeneficiary();">Add Beneficiary</button>
@@ -41,12 +42,86 @@
           <div id="payment_msg"></div>
         </div>
         <div class="col-md-6">
-          <button type="button" class="btn btn-primary" onClick="showBeneficiary();">Show Beneficiary</button>
+          <button type="button" class="btn btn-primary" id="btn_show" onClick="showBeneficiary();">Show Beneficiary</button>
           <div id="beneficiary_list"></div>
         </div>
         
       </div>
     </section>
+    <div class="modal fade" id="beneficiaryModal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">Beneficiary Form</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+          <div class="modal-body">
+            <form action="#" method="POST" id="frmEmp">
+              <div class="row">
+                <div class="col-md-8">
+                  <div class="form-group">
+                    <label for="fname">Full name</label>
+                    <input type="text" name="fname" id="fname" value="" class="form-control" required>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="nickname">Nickname</label>
+                    <input type="text" name="nickname" id="nickname" value="" class="form-control" required>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="bcountry">Country</label>
+                <input type="text" name="bcountry" id="bcountry" class="form-control" value="United Arab Emirates" required>
+              </div>
+              <div class="form-group">
+                <label for="bcity">City</label>
+                <input type="text" name="bcity" id="bcity" class="form-control" value="Abu Dhabi" required>
+              </div>
+              <div class="form-group">
+                <label for="baddress">Street Address</label>
+                <input type="text" name="baddress" id="baddress" class="form-control" value="Maryam Street" required>
+              </div>
+              <h5>Bank Details</h5>
+              <hr>
+              <div class="form-group">
+                <label for="biban">IBAN</label>
+                <input type="text" name="biban" id="biban" class="form-control" value="DAPIBANKAEMSHRQB1662990143750835525698" required>
+              </div>
+              <div class="form-group">
+                <label for="accNum">AccountNumber</label>
+                <input type="number" name="accNum" id="accNum" class="form-control" value="1662990143750835525698" required>
+              </div>
+              <div class="form-group">
+                <label for="swift_code">SWIFT Code</label>
+                <input type="text" name="swift_code" id="swift_code" class="form-control" value="DAPIBANK_AE_LIV" required>
+              </div>
+              <div class="form-group">
+                <label for="bank_name">Bank Name</label>
+                <input type="text" name="bank_name" id="bank_name" class="form-control" value="United Arab Bank" required>
+              </div>
+              <div class="form-group">
+                <label for="branch_name">Branch Name</label>
+                <input type="text" name="branch_name" id="branch_name" class="form-control" value="Main Branch" required>
+              </div>
+              <div class="form-group">
+                <label for="branch_country">Country</label>
+                <input type="text" name="branch_country" id="branch_country" class="form-control" value="United Arab Emirates" required>
+              </div>
+              <div class="form-group">
+                <label for="branch_address">Branch Address</label>
+                <input type="text" name="branch_address" id="branch_address" class="form-control" value="Dubai Mall" required>
+              </div>
+              <div class="form-group">
+                <button type="reset" class="btn btn-danger" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-success" id="btn_add">Add</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="modal fade" id="payoutModal">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -88,7 +163,7 @@
         var ba = null;
         var senderID = null;
         console.log(ba)
-
+        
         var handler = Dapi.create({
           environment: Dapi.environments.sandbox, //or .production
           appKey: "0cda695a3fdfdd74d9b09c30961c3c636f5f57c6221fb40a53c87ae383f4d33d", 
@@ -103,11 +178,13 @@
               ba = bankAccount; 
               $('#login').hide();
               $('#payFunc').show();
+              showBalance();
           },
           onFailedLogin: function(err) {
               if (err != null) {
-              console.log("Error");
+              console.log("Failed Login Error");
               console.log(err);
+              $('#widget').html('<div class="alert alert-info alert-dismissible"><button type="button" class="close" data-dismiss="alert">&times;</button>'+err.responseJSON.message+'</div>');
               } else {
               console.log("No error");
               }
@@ -115,30 +192,37 @@
           onReady: function() {
             console.log("Ready!"),
             connectLoading = false;
+            $('#widget').html('<div class="alert alert-info alert-dismissible"><button type="button" class="close" data-dismiss="alert">&times;</button>Ready!</div>');
               //handler.open(); // opens the Connect widget
           },
           onExit: function() {
               console.log("User exited the flow")
+              $('#widget').html('<div class="alert alert-info alert-dismissible"><button type="button" class="close" data-dismiss="alert">&times;</button>User exited the flow</div>');
           },
           onAuthModalOpen: function() {
-            console.log("MFA modal opened")
+              console.log("MFA modal opened")
             },
             onAuthModalSubmit: function() {
-            console.log("MFA answer submitted")
+              console.log("MFA answer submitted")
             }
         });
         function dapiLogin() {
             if (!connectLoading) {
                 handler.open();
             } else {
+                $('#widget').html('<div class="alert alert-info alert-dismissible"><button type="button" class="close" data-dismiss="alert">&times;</button>Widget is loading. Please wait!</div>');
                 console.error("Widget is loading. Please wait!");
             }
         };
 
         function showBalance() {
-          ba.data.getAccounts()
+          $('#btn_bal').html('<span class="spinner-border spinner-border-sm"></span> Loading..');
+          $('#btn_bal').attr('disabled', true);
+          if(ba != null){
+            ba.data.getAccounts()
               .then(payload => {
-
+                $('#btn_bal').html('Show Balance');
+                $('#btn_bal').removeAttr('disabled');
                 ba.showAccountsModal(
                 "Your message to the user",
                 payload.accounts,
@@ -151,13 +235,21 @@
                     console.dir("User Cancelled")
                 })
             })
+          }
+          
         }
         function showBeneficiary() {
+          $('#btn_show').html('<span class="spinner-border spinner-border-sm"></span> Loading..');
+          $('#btn_show').attr('disabled', true);
           $('#beneficiary_list').html("");
           ba.payment.getBeneficiaries()
               .then(benefResponse => {
+                $('#btn_bal').html('Show Beneficiaries');
+                $('#btn_bal').removeAttr('disabled');
                 if(benefResponse.status === "done") {
                   console.dir(benefResponse)
+                  $('#btn_show').html('Show Beneficiary');
+                  $('#btn_show').removeAttr('disabled');
                   if(benefResponse.success){
                     if(benefResponse.beneficiaries.length > 0){
                       $.each(benefResponse.beneficiaries, (i, val)=>{
@@ -173,35 +265,49 @@
                 } else {
                   console.error("API Responded with an error")
                   console.dir(benefResponse)
+                  $('#btn_show').html('Show Beneficiary');
+                  $('#btn_show').removeAttr('disabled');
                 }
               })
               .catch(error => {
+                $('#btn_bal').html('Show Beneficiaries');
+                $('#btn_bal').removeAttr('disabled');
                 console.dir(error)
             })
         }
         function addBeneficiary() {
+          $('#frmEmp')[0].reset();
+          $('#beneficiaryModal').modal('show');
+        }
+        $('#frmEmp').on('submit', (e)=>{
+          e.preventDefault();
+          $('#btn_add').html('<span class="spinner-border spinner-border-sm"></span> Loading..');
+          $('#btn_add').attr('disabled', true);
           var beneficiary = {
-            name: "Amit Sukla",
-              nickname: "Amit",
-            iban: "DAPIBANKAEMSHRQB1662531241437317563394",
-            accountNumber: "1662531241437317563394",
+            name: $('#fname').val(),
+              nickname: $('#nickname').val(),
+            iban: $('#biban').val(),
+            accountNumber: $('#accNum').val(),
             type: "local",
-            swiftCode: "DAPIBANK_AE_LIV",
+            swiftCode: $('#swift_code').val(),
             address: {
-                line1: "Maryam Street",
-                line2: "Abu Dhabi",
-                line3: "United Arab Emirates"
+                line1: $('#baddress').val(),
+                line2: $('#bcity').val(),
+                line3: $('#bcountry').val()
             },
-            country: "United Arab Emirates",
-            branchAddress: "Dubai Mall",
-            branchName: "Main Branch"  
+            country: $('#branch_country').val(),
+            branchAddress: $('#branch_address').val(),
+            branchName: $('#branch_name').val()  
           }
-
           $('#beneficiary_msg').html("");
           ba.payment.createBeneficiary(beneficiary)
               .then(benefResponse => {
+                $('#btn_add').html('Add');
+                $('#btn_add').removeAttr('disabled');
+                $('#beneficiaryModal').modal('hide');
                 if(benefResponse.status === "done") {
                   console.dir(benefResponse)
+                  showBeneficiary();
                   $('#beneficiary_msg').html('<div class="alert alert-success alert-dismissible"><button type="button" class="close" data-dismiss="alert">&times;</button>Beneficiary has been successfully added</div>');
                 } else {
                   console.error("API Responded with an error")
@@ -210,9 +316,10 @@
                 }
               })
               .catch(error => {
+                $('#beneficiaryModal').modal('hide');
                 console.dir(error)
             })
-        }
+        });
 
 
         $('#frmPayout').on('submit', (e)=>{
@@ -268,6 +375,7 @@
             .then(transferResponse => {
               if(transferResponse.status === "done") {
                 console.dir(transferResponse)
+                $('#payment_msg').html('<div class="alert alert-success alert-dismissible"><button type="button" class="close" data-dismiss="alert">&times;</button>Payment success</div>');
               } else {
                 console.error("API Responded with an error")
                 console.dir(transferResponse)
