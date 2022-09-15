@@ -476,6 +476,11 @@ class IndexController extends Controller
                     return response()->json(array('message'=> 'Employees not added.'), 400);
                 }   
             }
+            $check_payslip = DB::table('monthly_payouts')->where([
+                ['month', '=', $month],
+                ['financial_year', '=', $year],
+            ])->first();
+
             $data['mp_id'] = $check_payslip->id;
             $data['emps'] = DB::table('employee_month_payouts AS emp')
                 ->join('employees', 'emp.emp_id', '=', 'employees.id')
